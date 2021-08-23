@@ -135,7 +135,7 @@ def get_args(argv):
     parser.add_argument('--repeat', type=int, default=1, help="Repeat the experiment N times")
     parser.add_argument('--incremental_class', dest='incremental_class', default=False, action='store_true',
                         help="The number of output node in the single-headed model increases along with new categories.")
-    parser.add_argument('--allow_shuffle', dest='allow_shuffle', default=True, action='store_true',
+    parser.add_argument('--allow_shuffle',type=bool, default=True,
                         help="whether shuffling allowed during training")
     
     args = parser.parse_args(argv)
