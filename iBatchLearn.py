@@ -51,7 +51,7 @@ def run(args):
         train_dataset_all = torch.utils.data.ConcatDataset(train_dataset_splits.values())
         val_dataset_all = torch.utils.data.ConcatDataset(val_dataset_splits.values())
         train_loader = torch.utils.data.DataLoader(train_dataset_all,
-                                                   batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
+                                                   batch_size=args.batch_size, shuffle=args.allow_shuffle, num_workers=args.workers)
         val_loader = torch.utils.data.DataLoader(val_dataset_all,
                                                  batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
 
@@ -66,7 +66,7 @@ def run(args):
             train_name = task_names[i]
             print('======================',train_name,'=======================')
             train_loader = torch.utils.data.DataLoader(train_dataset_splits[train_name],
-                                                        batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
+                                                        batch_size=args.batch_size, shuffle=args.allow_shuffle, num_workers=args.workers)
             val_loader = torch.utils.data.DataLoader(val_dataset_splits[train_name],
                                                       batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
 
@@ -131,6 +131,9 @@ def get_args(argv):
     parser.add_argument('--repeat', type=int, default=1, help="Repeat the experiment N times")
     parser.add_argument('--incremental_class', dest='incremental_class', default=False, action='store_true',
                         help="The number of output node in the single-headed model increases along with new categories.")
+    parser.add_argument('--allow_shuffle', dest='allow_shuffle', default=True, action='store_true',
+                        help="whether shuffling allowed during training")
+    
     args = parser.parse_args(argv)
     return args
 
