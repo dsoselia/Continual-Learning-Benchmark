@@ -16,7 +16,7 @@ class CacheClassLabel(data.Dataset):
         if path.exists(label_cache_filename):
             self.labels = torch.load(label_cache_filename)
         else:
-            for i, data in tqdm(enumerate(dataset)):
+            for i, data in tqdm(enumerate(dataset), total = len(dataset)):
                 self.labels[i] = data[1]
             torch.save(self.labels, label_cache_filename)
         self.number_classes = len(torch.unique(self.labels))
