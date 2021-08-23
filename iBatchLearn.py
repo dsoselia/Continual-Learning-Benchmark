@@ -54,6 +54,11 @@ def run(args):
                                                    batch_size=args.batch_size, shuffle=args.allow_shuffle, num_workers=args.workers)
         val_loader = torch.utils.data.DataLoader(val_dataset_all,
                                                  batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
+        for x, y, tsk in train_loader:
+            print("shape______________")
+            print(x.shape)
+            break
+
 
         agent.learn_batch(train_loader, val_loader)
 
@@ -69,7 +74,6 @@ def run(args):
                                                         batch_size=args.batch_size, shuffle=args.allow_shuffle, num_workers=args.workers)
             val_loader = torch.utils.data.DataLoader(val_dataset_splits[train_name],
                                                       batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
-
             if args.incremental_class:
                 agent.add_valid_output_dim(task_output_space[train_name])
 

@@ -1,6 +1,9 @@
 import torchvision
 from torchvision import transforms
 from .wrapper import CacheClassLabel
+from .xraydataset import XrayDataset
+from sklearn.model_selection import train_test_split
+import pandas as pd
 
 def MNIST(dataroot, train_aug=False):
     # Add padding to make 32x32
@@ -106,3 +109,15 @@ def CIFAR100(dataroot, train_aug=False):
 
     return train_dataset, val_dataset
 
+def MIMIC6(dataroot, train_aug=True, df_path = "/gdrive/MyDrive/CL_notebooks/data/img_ids_filtered.csv"):
+    df = pd.read_csv()
+    train_df, test_df = train_test_split(df, test_size=0.2)
+    transformations = transforms.Compose([transforms.ToTensor(), torchvision.transforms.RandomResizedCrop(size = 32, scale = (0.9, 1.0), ratio = (1,1)), torchvision.transforms.RandomPerspective(distortion_scale=0.1, p=0.3) ,transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) ])
+    transformations_test = transforms.Compose([transforms.ToTensor(), torchvision.transforms.RandomResizedCrop(size = 32, scale = (0.9, 1.0), ratio = (1,1)) ,transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) ])
+    if train_aug:
+        train_set = XrayDataset(train_df, transform = transformations )
+    else:
+        train_set = XrayDataset(train_df, transform = transformations_test )
+    test_set = XrayDataset(test_df, transform = transformations_test )
+    return train_set, test_set
+ 
