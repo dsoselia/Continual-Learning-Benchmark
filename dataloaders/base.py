@@ -110,7 +110,7 @@ def CIFAR100(dataroot, train_aug=False):
     return train_dataset, val_dataset
 
 def XRAY(dataroot, train_aug=True, df_path = "/gdrive/MyDrive/CL_notebooks/data/img_ids_filtered.csv"):
-    df = pd.read_csv()
+    df = pd.read_csv(df_path)
     train_df, test_df = train_test_split(df, test_size=0.2)
     transformations = transforms.Compose([transforms.ToTensor(), torchvision.transforms.RandomResizedCrop(size = 32, scale = (0.9, 1.0), ratio = (1,1)), torchvision.transforms.RandomPerspective(distortion_scale=0.1, p=0.3) ,transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) ])
     transformations_test = transforms.Compose([transforms.ToTensor(), torchvision.transforms.RandomResizedCrop(size = 32, scale = (0.9, 1.0), ratio = (1,1)) ,transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) ])
