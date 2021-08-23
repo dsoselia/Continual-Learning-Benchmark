@@ -119,5 +119,6 @@ def XRAY(dataroot, train_aug=True, df_path = "/gdrive/MyDrive/CL_notebooks/data/
     else:
         train_set = XrayDataset(train_df, transform = transformations_test )
     test_set = XrayDataset(test_df, transform = transformations_test )
+    train_set, test_set = CacheClassLabel(train_set), CacheClassLabel(test_set)
     return train_set, test_set
  
