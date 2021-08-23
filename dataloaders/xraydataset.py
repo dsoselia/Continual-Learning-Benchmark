@@ -40,6 +40,7 @@ class XrayDataset(Dataset):
         self.annotations = df
         self.transform = transform
         self.parent_dir = parent_dir
+        self.root = parent_dir
     def __len__(self):
         return len(self.annotations)
     def __getitem__(self, index):
