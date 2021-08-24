@@ -30,35 +30,60 @@ import cv2
 
 import pandas as pd
 from pathlib import Path
+from tqdm import tqdm
 
 
 
 
 
 class XrayDataset(Dataset):
-    def __init__(self, df, transform = None, parent_dir = Path("mimic/mimic_scaled/")):
+    def __init__(self, df, transform = None, parent_dir = Path("/mnt/e/linux/"), preload = True): #
         self.annotations = df
         self.transform = transform
         self.parent_dir = parent_dir
         self.root = parent_dir
+        self.preload = preload
+
+        if preload:
+            X = []
+            y = []
+            print("loading Xray data")
+            for i, row in tqdm(df.iterrows(), total = len(df)):
+                img_id = row.img_id
+                img_path = str(self.parent_dir/"mimic_scaled"/img_id)
+                image = cv2.imread(img_path, cv2.IMREAD_COLOR)
+                y_label = row.class_id
+                X.append(image)
+                y.append(y_label)
+            self.X = X
+            self.y = np.array(y)
+
     def __len__(self):
         return len(self.annotations)
     def __getitem__(self, index):
-        img_id = self.annotations.iloc[index].img_id
+        y_df = self.annotations.iloc[index].class_id
 
-        img_path = str(self.parent_dir/img_id)
-        
-        image = cv2.imread(img_path, cv2.IMREAD_COLOR)
-        if image is None:
-            print("image not found")
-            # image = cv2.imread(img_path, cv2.IMREAD_COLOR)
-        
-            # image = self.resize_to(image, 240)
-            # cv2.imwrite( img_path[:-4]+ "_scaled.jpg" ,  image)
-        
-#         print(image.shape)
-#         image = read_image(img_path)
-        y_label = self.annotations.iloc[index].class_id
+        if self.preload:
+            image = self.X[index]
+            y_label = self.y[index]
+            if y_label != y_df:
+                print("mismatch")
+                raise ValueError
+        else:
+            img_id = self.annotations.iloc[index].img_id
+            img_path = str(self.parent_dir/"mimic_scaled"/img_id)
+            
+            image = cv2.imread(img_path, cv2.IMREAD_COLOR)
+            if image is None:
+                print("image not found")
+                # image = cv2.imread(img_path, cv2.IMREAD_COLOR)
+            
+                # image = self.resize_to(image, 240)
+                # cv2.imwrite( img_path[:-4]+ "_scaled.jpg" ,  image)
+            
+    #         print(image.shape)
+    #         image = read_image(img_path)
+            y_label = self.annotations.iloc[index].class_id
         if self.transform:
             image = self.transform(image)
         return [image, y_label]
