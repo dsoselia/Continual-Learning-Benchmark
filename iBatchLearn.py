@@ -8,7 +8,31 @@ from collections import OrderedDict
 import dataloaders.base
 from dataloaders.datasetGen import SplitGen, PermutedGen
 import agents
+from tqdm import tqdm
+from collections import Counter
+from torch.utils.data.sampler import WeightedRandomSampler
 
+def get_class_sampler(train_loader):
+    class_distribution = Counter()
+
+    for x, y, task_id in tqdm(train_loader , total = len(train_loader) ):
+        class_distribution += Counter(y.detach().numpy())
+    sampling_weights = []
+
+    for i in range(len(class_distribution)):
+        sampling_weights.append(sum(class_distribution.values())/class_distribution[i])
+    
+    per_sample_weights = []
+
+
+    for x, y, task_id in tqdm(train_loader , total = len(train_loader) ):
+        for i in y:
+            per_sample_weights.append(sampling_weights[i])
+
+    per_sample_weights_tensor = np.array(per_sample_weights)
+    per_sample_weights_tensor = torch.from_numpy(per_sample_weights_tensor)
+    sampler = WeightedRandomSampler(per_sample_weights_tensor, len(per_sample_weights_tensor))
+    return sampler
 
 def run(args):
     if not os.path.exists('outputs'):
@@ -52,6 +76,11 @@ def run(args):
         val_dataset_all = torch.utils.data.ConcatDataset(val_dataset_splits.values())
         train_loader = torch.utils.data.DataLoader(train_dataset_all,
                                                    batch_size=args.batch_size, shuffle=args.allow_shuffle, num_workers=args.workers)
+
+        sampler = get_class_sampler(train_loader)
+        train_loader = torch.utils.data.DataLoader(train_dataset_all,
+                                                   batch_size=args.batch_size, shuffle=args.allow_shuffle, num_workers=args.workers,  sampler = sampler)
+        
         val_loader = torch.utils.data.DataLoader(val_dataset_all,
                                                  batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
         for x, y, tsk in train_loader:
@@ -72,6 +101,12 @@ def run(args):
             print('======================',train_name,'=======================')
             train_loader = torch.utils.data.DataLoader(train_dataset_splits[train_name],
                                                         batch_size=args.batch_size, shuffle=args.allow_shuffle, num_workers=args.workers)
+            print("Debugger type_____ : ", type(train_dataset_splits[train_name]))
+            print("length ______ : " , len(train_dataset_splits[train_name]))
+            sampler = get_class_sampler(train_loader)
+            train_loader = torch.utils.data.DataLoader(train_dataset_splits[train_name],
+                                                    batch_size=args.batch_size, shuffle=args.allow_shuffle, num_workers=args.workers,  sampler = sampler)
+
             val_loader = torch.utils.data.DataLoader(val_dataset_splits[train_name],
                                                       batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
             if args.incremental_class:
@@ -135,7 +170,7 @@ def get_args(argv):
     parser.add_argument('--repeat', type=int, default=1, help="Repeat the experiment N times")
     parser.add_argument('--incremental_class', dest='incremental_class', default=False, action='store_true',
                         help="The number of output node in the single-headed model increases along with new categories.")
-    parser.add_argument('--allow_shuffle',type=bool, default=True,
+    parser.add_argument('--allow_shuffle',type=int, default=1,
                         help="whether shuffling allowed during training")
     
     args = parser.parse_args(argv)
@@ -143,6 +178,14 @@ def get_args(argv):
 
 if __name__ == '__main__':
     args = get_args(sys.argv[1:])
+    print(args.allow_shuffle)
+    if args.allow_shuffle == 1:
+        args.allow_shuffle = True
+        print("Will shuffle")
+    else:
+        args.allow_shuffle = False
+        print("won't shuffle")
+
     reg_coef_list = args.reg_coef
     avg_final_acc = {}
 
