@@ -83,6 +83,13 @@ def run(args):
         
         val_loader = torch.utils.data.DataLoader(val_dataset_all,
                                                  batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
+        val_sampler = get_class_sampler(val_loader)
+        val_loader = torch.utils.data.DataLoader(val_dataset_all,
+                                                 batch_size=args.batch_size, shuffle=False, num_workers=args.workers,  sampler = val_sampler)
+
+
+
+
         for x, y, tsk in train_loader:
             print("shape______________")
             print(x.shape)
@@ -107,8 +114,22 @@ def run(args):
             train_loader = torch.utils.data.DataLoader(train_dataset_splits[train_name],
                                                     batch_size=args.batch_size, shuffle=args.allow_shuffle, num_workers=args.workers,  sampler = sampler)
 
+
+
+
+
+
+
             val_loader = torch.utils.data.DataLoader(val_dataset_splits[train_name],
                                                       batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
+
+            val_sampler = get_class_sampler(val_loader)
+            val_loader = torch.utils.data.DataLoader(val_dataset_splits[train_name],
+                                                      batch_size=args.batch_size, shuffle=False, num_workers=args.workers, sampler = val_sampler)
+
+            
+
+
             if args.incremental_class:
                 agent.add_valid_output_dim(task_output_space[train_name])
 
@@ -124,6 +145,15 @@ def run(args):
                 val_loader = torch.utils.data.DataLoader(val_data,
                                                          batch_size=args.batch_size, shuffle=False,
                                                          num_workers=args.workers)
+
+                val_sampler = get_class_sampler(val_loader)
+                val_loader = torch.utils.data.DataLoader(val_data,
+                                                        batch_size=args.batch_size, shuffle=False, num_workers=args.workers, sampler = val_sampler)
+
+
+
+
+
                 acc_table[val_name][train_name] = agent.validation(val_loader)
 
     return acc_table, task_names
