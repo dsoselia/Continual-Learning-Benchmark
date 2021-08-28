@@ -122,3 +122,17 @@ def XRAY(dataroot, train_aug=True, df_path = "/gdrive/MyDrive/CL_notebooks/data/
     train_set, test_set = CacheClassLabel(train_set), CacheClassLabel(test_set)
     return train_set, test_set
  
+
+def XRAY_seq(dataroot, train_aug=True, df_path = "/gdrive/MyDrive/CL_notebooks/data/img_ids_altered.csv"):  #/mnt/d/linx_dir/MIMIC_jpg/img_ids_filtered_6.csv
+    df = pd.read_csv(df_path)
+    train_df, test_df = train_test_split(df, test_size=0.2, random_state=11)
+    transformations = transforms.Compose([transforms.ToTensor(), torchvision.transforms.RandomResizedCrop(size = 32, scale = (0.9, 1.0), ratio = (1,1)), torchvision.transforms.RandomPerspective(distortion_scale=0.1, p=0.3) ,transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) ])
+    transformations_test = transforms.Compose([transforms.ToTensor(), torchvision.transforms.RandomResizedCrop(size = 32, scale = (0.9, 1.0), ratio = (1,1)) ,transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) ])
+    if train_aug:
+        train_set = XrayDataset(train_df, transform = transformations )
+    else:
+        train_set = XrayDataset(train_df, transform = transformations_test )
+    test_set = XrayDataset(test_df, transform = transformations_test )
+    train_set, test_set = CacheClassLabel(train_set), CacheClassLabel(test_set)
+    return train_set, test_set
+ 
