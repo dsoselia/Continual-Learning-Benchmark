@@ -37,7 +37,7 @@ from tqdm import tqdm
 
 
 class XrayDataset(Dataset):
-    def __init__(self, df, transform = None, parent_dir = Path("mimic"), preload = True): #
+    def __init__(self, df, transform = None, parent_dir = Path("data/mimic"), preload = True): #
         self.annotations = df
         self.transform = transform
         self.parent_dir = parent_dir
@@ -97,7 +97,7 @@ class XrayDataset(Dataset):
 
 
 class XrayDatasetExtended(Dataset):
-    def __init__(self, df, transform = None, parent_dir = Path("mimic"), preload = True): #
+    def __init__(self, df, transform = None, parent_dir = Path("data/mimic"), preload = True): #
         self.annotations = df
         self.transform = transform
         self.parent_dir = parent_dir
